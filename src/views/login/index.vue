@@ -12,18 +12,17 @@
         <h3 class="title">
           {{ $t('login.title') }}
         </h3>
-        <lang-select class="set-language" />
       </div>
 
-      <el-form-item prop="username">
+      <el-form-item prop="name">
         <span class="svg-container">
           <svg-icon name="user" />
         </span>
         <el-input
-          ref="username"
-          v-model="loginForm.username"
+          ref="name"
+          v-model="loginForm.name"
           :placeholder="$t('login.username')"
-          name="username"
+          name="name"
           type="text"
           tabindex="1"
           autocomplete="on"
@@ -71,24 +70,6 @@
         {{ $t('login.logIn') }}
       </el-button>
 
-      <div style="position:relative">
-        <div class="tips">
-          <span>{{ $t('login.username') }} : admin </span>
-          <span>{{ $t('login.password') }} : {{ $t('login.any') }} </span>
-        </div>
-        <div class="tips">
-          <span>{{ $t('login.username') }} : editor </span>
-          <span>{{ $t('login.password') }} : {{ $t('login.any') }} </span>
-        </div>
-
-        <el-button
-          class="thirdparty-button"
-          type="primary"
-          @click="showDialog=true"
-        >
-          {{ $t('login.thirdparty') }}
-        </el-button>
-      </div>
     </el-form>
 
     <el-dialog
@@ -105,6 +86,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable */
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { Route } from 'vue-router'
 import { Dictionary } from 'vue-router/types/router'
@@ -131,20 +113,20 @@ export default class extends Vue {
   }
 
   private validatePassword = (rule: any, value: string, callback: Function) => {
-    if (value.length < 6) {
-      callback(new Error('The password can not be less than 6 digits'))
+    if (value.length < 3) {
+      callback(new Error('The password can not be less than 3 digits'))
     } else {
       callback()
     }
   }
 
   private loginForm = {
-    username: 'admin',
-    password: '111111'
+    name: '',
+    password: ''
   }
 
   private loginRules = {
-    username: [{ validator: this.validateUsername, trigger: 'blur' }],
+    name: [{ validator: this.validateUsername, trigger: 'blur' }],
     password: [{ validator: this.validatePassword, trigger: 'blur' }]
   }
 
@@ -167,8 +149,8 @@ export default class extends Vue {
   }
 
   mounted() {
-    if (this.loginForm.username === '') {
-      (this.$refs.username as Input).focus()
+    if (this.loginForm.name === '') {
+      (this.$refs.name as Input).focus()
     } else if (this.loginForm.password === '') {
       (this.$refs.password as Input).focus()
     }
@@ -199,11 +181,11 @@ export default class extends Vue {
           path: this.redirect || '/',
           query: this.otherQuery
         }).catch(err => {
-          console.warn(err)
+          this.loading = false;
         })
         // Just to simulate the time of the request
         setTimeout(() => {
-          this.loading = false
+          this.loading = false;
         }, 0.5 * 1000)
       } else {
         return false

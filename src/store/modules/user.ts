@@ -54,13 +54,13 @@ class User extends VuexModule implements IUserState {
     this.email = email
   }
 
-  @Action
-  public async Login(userInfo: { username: string, password: string}) {
-    let { username, password } = userInfo
-    username = username.trim()
-    const { data } = await login({ username, password })
-    setToken(data.accessToken)
-    this.SET_TOKEN(data.accessToken)
+  @Action({ rawError: true })
+  public async Login(userInfo: { name: string, password: string}) {
+    let { name, password } = userInfo
+    name = name.trim()
+    const { data } = await login({ name, password })
+    setToken(data.token)
+    this.SET_TOKEN(data.token)
   }
 
   @Action
@@ -70,7 +70,7 @@ class User extends VuexModule implements IUserState {
     this.SET_ROLES([])
   }
 
-  @Action
+  @Action({ rawError: true })
   public async GetUserInfo() {
     if (this.token === '') {
       throw Error('GetUserInfo: token is undefined!')
