@@ -112,7 +112,7 @@ import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
 import { RouteConfig } from 'vue-router'
 import { Tree } from 'element-ui'
-import { getRoutes, getRoles, createRole, deleteRole, updateRole } from '@/api/roles'
+import { getRoutes, getRoles, createRole, deleteRole, updateRole, getRolePermission } from '@/api/roles'
 
 interface IRole {
   role_id: number
@@ -239,13 +239,16 @@ export default class extends Vue {
     this.dialogVisible = true
   }
 
-  private handleEdit(scope: any) {
+  private async handleEdit(scope: any) {
     this.dialogType = 'edit'
     this.dialogVisible = true
     this.checkStrictly = true
     this.role = cloneDeep(scope.row)
+    const { data } = await getRolePermission(this.role.role_id)
+    // this.role.routes = data;
     this.$nextTick(() => {
-      const routes = this.flattenRoutes(this.reshapeRoutes(this.role.routes))
+      const routes = this.flattenRoutes(this.reshapeRoutes(data))
+
       const treeData = this.generateTreeData(routes)
       const treeDataKeys = treeData.map(t => t.path);
       (this.$refs.tree as Tree).setCheckedKeys(treeDataKeys)

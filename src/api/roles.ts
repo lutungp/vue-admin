@@ -33,3 +33,9 @@ export const getRoutes = (params: any) =>
     method: 'get',
     params
   })
+
+export const getRolePermission = (id: number) =>
+  request({
+    url: `/permission/${id}`,
+    method: 'get'
+  })
