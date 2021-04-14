@@ -14,20 +14,11 @@
     >
       <el-table-column
         align="center"
-        label="Role Key"
-        width="220"
-      >
-        <template slot-scope="{row}">
-          {{ row.key }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        align="center"
         label="Role Name"
         width="220"
       >
         <template slot-scope="{row}">
-          {{ row.name }}
+          {{ row.role_nama }}
         </template>
       </el-table-column>
       <el-table-column
@@ -35,7 +26,7 @@
         label="Description"
       >
         <template slot-scope="{row}">
-          {{ row.description }}
+          {{ row.role_keterangan }}
         </template>
       </el-table-column>
       <el-table-column
@@ -72,13 +63,13 @@
       >
         <el-form-item label="Name">
           <el-input
-            v-model="role.name"
+            v-model="role.role_nama"
             placeholder="Role Name"
           />
         </el-form-item>
         <el-form-item label="Desc">
           <el-input
-            v-model="role.description"
+            v-model="role.role_keterangan"
             :autosize="{minRows: 2, maxRows: 4}"
             type="textarea"
             placeholder="Role Description"
@@ -115,6 +106,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable */ 
 import path from 'path'
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
@@ -123,9 +115,9 @@ import { Tree } from 'element-ui'
 import { getRoutes, getRoles, createRole, deleteRole, updateRole } from '@/api/roles'
 
 interface IRole {
-  key: number
-  name: string
-  description: string
+  role_id: number
+  role_nama: string
+  role_keterangan: string
   routes: RouteConfig[]
 }
 
@@ -136,9 +128,9 @@ interface IRoutesTreeData {
 }
 
 const defaultRole: IRole = {
-  key: 0,
-  name: '',
-  description: '',
+  role_id: 0,
+  role_nama: '',
+  role_keterangan: '',
   routes: []
 }
 
@@ -187,7 +179,7 @@ export default class extends Vue {
         title: '',
         path: ''
       }
-      tmp.title = this.$t(`route.${route.meta.title}`).toString()
+      tmp.title = this.$t(`${route.meta.title}`).toString()
       tmp.path = route.path
       if (route.children) {
         tmp.children = this.generateTreeData(route.children)
@@ -270,7 +262,7 @@ export default class extends Vue {
       type: 'warning'
     })
       .then(async() => {
-        await deleteRole(row.key)
+        await deleteRole(row.role_id)
         this.rolesList.splice($index, 1)
         this.$message({
           type: 'success',
@@ -302,28 +294,28 @@ export default class extends Vue {
     this.role.routes = this.generateTree(cloneDeep(this.serviceRoutes), '/', checkedKeys)
 
     if (isEdit) {
-      await updateRole(this.role.key, { role: this.role })
+      await updateRole(this.role.role_id, { role: this.role })
       for (let index = 0; index < this.rolesList.length; index++) {
-        if (this.rolesList[index].key === this.role.key) {
+        if (this.rolesList[index].role_id === this.role.role_id) {
           this.rolesList.splice(index, 1, Object.assign({}, this.role))
           break
         }
       }
     } else {
       const { data } = await createRole({ role: this.role })
-      this.role.key = data.key
+      this.role.role_id = data.role_id
       this.rolesList.push(this.role)
     }
 
-    const { description, key, name } = this.role
+    const { role_keterangan, role_id, role_nama } = this.role
     this.dialogVisible = false
     this.$notify({
       title: 'Success',
       dangerouslyUseHTMLString: true,
       message: `
-          <div>Role Key: ${key}</div>
-          <div>Role Name: ${name}</div>
-          <div>Description: ${description}</div>
+          <div>Role Key: ${role_id}</div>
+          <div>Role Name: ${role_nama}</div>
+          <div>Description: ${role_keterangan}</div>
         `,
       type: 'success'
     })
