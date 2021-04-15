@@ -75,55 +75,17 @@
             placeholder="Role Description"
           />
         </el-form-item>
-
-          <el-table
-            :data="tableData"
-            style="width: 100%;margin-bottom: 20px;"
-            row-key="route_id"
-            border
-            default-expand-all>
-            <el-table-column
-              prop="meta.title"
-              label="Path">
-            </el-table-column>
-            <el-table-column
-              prop="create"
-              label="Create"
-              align="center"
-              width="129">
-                <template slot-scope="scope">
-                    <el-checkbox :checked="scope.row.create==='y'"/>
-                </template>
-            </el-table-column>
-            <el-table-column
-              prop="read"
-              label="Read"
-              align="center"
-              width="129">
-              <template slot-scope="scope">
-                    <el-checkbox :checked="scope.row.read==='y'"/>
-                </template>
-            </el-table-column>
-            <el-table-column
-              prop="update"
-              label="Update"
-              align="center"
-              width="129">
-              <template slot-scope="scope">
-                    <el-checkbox :checked="scope.row.update==='y'"/>
-                </template>
-            </el-table-column>
-            <el-table-column
-              prop="delete"
-              label="Delete"
-              align="center"
-              width="129">
-              <template slot-scope="scope">
-                    <el-checkbox :checked="scope.row.delete==='y'"/>
-                </template>
-            </el-table-column>
-          </el-table>
-
+        <el-form-item label="Menus">
+          <el-tree
+            ref="tree"
+            :check-strictly="checkStrictly"
+            :data="routesTreeData"
+            :props="defaultProps"
+            show-checkbox
+            node-key="path"
+            class="permission-tree"
+          />
+        </el-form-item>
       </el-form>
       <div style="text-align:right;">
         <el-button
@@ -159,17 +121,10 @@ interface IRole {
   routes: RouteConfig[]
 }
 
-interface IRoutesData {
-  permission_id: number
-  route_id: number
-  route_level: number
-  path   : string
-  create : string
-  read   : string
-  update : string
-  delete : string
-  meta : []
-  children : IRoutesData[]
+interface IRoutesTreeData {
+  children: IRoutesTreeData[]
+  title: string
+  path: string
 }
 
 const defaultRole: IRole = {
@@ -184,12 +139,20 @@ const defaultRole: IRole = {
 })
 export default class extends Vue {
   private role = Object.assign({}, defaultRole)
+  private reshapedRoutes: RouteConfig[] = []
   private serviceRoutes: RouteConfig[] = []
   private rolesList: IRole[] = []
   private dialogVisible = false
   private dialogType = 'new'
   private checkStrictly = false
-  private tableData: IRoutesData[] = []
+  private defaultProps = {
+    children: 'children',
+    label: 'title'
+  }
+
+  get routesTreeData() {
+    return this.generateTreeData(this.reshapedRoutes)
+  }
 
   created() {
     // Mock: get all routes and roles list from server
@@ -199,14 +162,72 @@ export default class extends Vue {
 
   private async getRoutes() {
     const { data } = await getRoutes({ /* Your params here */ })
-    // this.serviceRoutes = data.routesTreeData
-    console.log(data.routes)
-    this.tableData = data.routes;
+    this.serviceRoutes = data.routes
+    this.reshapedRoutes = this.reshapeRoutes(data.routes)
   }
 
   private async getRoles() {
     const { data } = await getRoles({ /* Your params here */ })
     this.rolesList = data.items
+  }
+
+  private generateTreeData(routes: RouteConfig[]) {
+    const data: IRoutesTreeData[] = []
+    for (const route of routes) {
+      const tmp: IRoutesTreeData = {
+        children: [],
+        title: '',
+        path: ''
+      }
+      tmp.title = this.$t(`${route.meta.title}`).toString()
+      tmp.path = route.path
+      if (route.children) {
+        tmp.children = this.generateTreeData(route.children)
+      }
+      data.push(tmp)
+    }
+    return data
+  }
+
+  // Reshape the routes structure so that it looks the same as the sidebar
+  private reshapeRoutes(routes: RouteConfig[], basePath = '/') {
+    const reshapedRoutes: RouteConfig[] = []
+    for (let route of routes) {
+      // Skip hidden routes
+      if (route.meta && route.meta.hidden) {
+        continue
+      }
+      const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
+      if (route.children && onlyOneShowingChild && (!route.meta || !route.meta.alwaysShow)) {
+        route = onlyOneShowingChild
+      }
+      const data: RouteConfig = {
+        path: path.resolve(basePath, route.path),
+        meta: {
+          title: route.meta && route.meta.title
+        }
+      }
+      // Recursive generate child routes
+      if (route.children) {
+        data.children = this.reshapeRoutes(route.children, data.path)
+      }
+      reshapedRoutes.push(data)
+    }
+    return reshapedRoutes
+  }
+
+  private flattenRoutes(routes: RouteConfig[]) {
+    let data: RouteConfig[] = []
+    routes.forEach(route => {
+      data.push(route)
+      if (route.children) {
+        const temp = this.flattenRoutes(route.children)
+        if (temp.length > 0) {
+          data = [...data, ...temp]
+        }
+      }
+    })
+    return data
   }
 
   private handleCreateRole() {
@@ -224,6 +245,16 @@ export default class extends Vue {
     this.checkStrictly = true
     this.role = cloneDeep(scope.row)
     const { data } = await getRolePermission(this.role.role_id)
+    // this.role.routes = data;
+    this.$nextTick(() => {
+      const routes = this.flattenRoutes(this.reshapeRoutes(data))
+
+      const treeData = this.generateTreeData(routes)
+      const treeDataKeys = treeData.map(t => t.path);
+      (this.$refs.tree as Tree).setCheckedKeys(treeDataKeys)
+      // set checked state of a node not affects its father and child nodes
+      this.checkStrictly = false
+    })
   }
 
   private handleDelete(scope: any) {
@@ -244,8 +275,26 @@ export default class extends Vue {
       .catch(err => { console.error(err) })
   }
 
+  private generateTree(routes: RouteConfig[], basePath = '/', checkedKeys: string[]) {
+    const res: RouteConfig[] = []
+    for (const route of routes) {
+      const routePath = path.resolve(basePath, route.path)
+      // recursive child routes
+      if (route.children) {
+        route.children = this.generateTree(route.children, routePath, checkedKeys)
+      }
+      if (checkedKeys.includes(routePath) || (route.children && route.children.length >= 1)) {
+        res.push(route)
+      }
+    }
+    return res
+  }
+
   private async confirmRole() {
     const isEdit = this.dialogType === 'edit'
+    const checkedKeys = (this.$refs.tree as Tree).getCheckedKeys()
+
+    this.role.routes = this.generateTree(cloneDeep(this.serviceRoutes), '/', checkedKeys)
 
     if (isEdit) {
       await updateRole(this.role.role_id, { role: this.role })
@@ -275,6 +324,23 @@ export default class extends Vue {
     })
   }
 
+  // Reference: src/layout/components/Sidebar/SidebarItem.vue
+  private onlyOneShowingChild(children: RouteConfig[] = [], parent: RouteConfig) {
+    let onlyOneChild = null
+    const showingChildren = children.filter(item => !item.meta || !item.meta.hidden)
+    // When there is only one child route, the child route is displayed by default
+    if (showingChildren.length === 1) {
+      onlyOneChild = showingChildren[0]
+      onlyOneChild.path = path.resolve(parent.path, onlyOneChild.path)
+      return onlyOneChild
+    }
+    // Show parent if there are no child route to display
+    if (showingChildren.length === 0) {
+      onlyOneChild = { ...parent, path: '' }
+      return onlyOneChild
+    }
+    return false
+  }
 }
 </script>
 
