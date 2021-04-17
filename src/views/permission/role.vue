@@ -92,7 +92,7 @@
               align="center"
               width="129">
                 <template slot-scope="scope">
-                    <el-checkbox :checked="scope.row.create==='y'"/>
+                    <el-checkbox v-model="scope.row.create" @change="checkingCreateBox(scope.row, scope.row.create)"/>
                 </template>
             </el-table-column>
             <el-table-column
@@ -101,7 +101,7 @@
               align="center"
               width="129">
               <template slot-scope="scope">
-                    <el-checkbox :checked="scope.row.read==='y'"/>
+                    <el-checkbox v-model="scope.row.read" @change="checkingReadBox(scope.row, scope.row.read)"/>
                 </template>
             </el-table-column>
             <el-table-column
@@ -110,7 +110,7 @@
               align="center"
               width="129">
               <template slot-scope="scope">
-                    <el-checkbox :checked="scope.row.update==='y'"/>
+                    <el-checkbox v-model="scope.row.update" @change="checkingUpdateBox(scope.row, scope.row.update)"/>
                 </template>
             </el-table-column>
             <el-table-column
@@ -119,7 +119,7 @@
               align="center"
               width="129">
               <template slot-scope="scope">
-                    <el-checkbox :checked="scope.row.delete==='y'"/>
+                    <el-checkbox v-model="scope.row.delete" @change="checkingDeleteBox(scope.row, scope.row.delete)"/>
                 </template>
             </el-table-column>
           </el-table>
@@ -164,12 +164,26 @@ interface IRoutesData {
   route_id: number
   route_level: number
   path   : string
-  create : string
-  read   : string
-  update : string
-  delete : string
+  create : boolean
+  read   : boolean
+  update : boolean
+  delete : boolean
   meta : []
-  children : IRoutesData[]
+  children : IRoutesDataCh[]
+}
+
+interface IRoutesDataCh {
+  permission_id: number
+  route_id: number
+  s_route_id: number
+  route_level: number
+  path   : string
+  create : boolean
+  read   : boolean
+  update : boolean
+  delete : boolean
+  meta : []
+  children : IRoutesDataCh[]
 }
 
 const defaultRole: IRole = {
@@ -199,14 +213,68 @@ export default class extends Vue {
 
   private async getRoutes() {
     const { data } = await getRoutes({ /* Your params here */ })
-    // this.serviceRoutes = data.routesTreeData
-    console.log(data.routes)
     this.tableData = data.routes;
   }
 
   private async getRoles() {
     const { data } = await getRoles({ /* Your params here */ })
     this.rolesList = data.items
+  }
+
+  private checkingCreateBox (row : any, value : boolean): void{
+      let children = row.children;
+      children.forEach((ch : any) => {
+        ch.create = value;
+      });
+
+      if (children.length == 0) {
+        const s_route_id = row.s_route_id;
+
+        const tableData = this.tableData.filter(p=>p.route_id == s_route_id)
+        tableData[0].create = value;
+      }
+  }
+
+  private checkingReadBox (row : any, value : boolean){
+      let children = row.children;
+      children.forEach((ch : any) => {
+        ch.read = value;
+      });
+
+      if (children.length == 0) {
+        const s_route_id = row.s_route_id;
+
+        const tableData = this.tableData.filter(p=>p.route_id == s_route_id)
+        tableData[0].read = value;
+      }
+  }
+
+  private checkingUpdateBox (row : any, value : boolean){
+      let children = row.children;
+      children.forEach((ch : any) => {
+        ch.update = value;
+      });
+
+      if (children.length == 0) {
+        const s_route_id = row.s_route_id;
+
+        const tableData = this.tableData.filter(p=>p.route_id == s_route_id)
+        tableData[0].update = value;
+      }
+  }
+
+  private checkingDeleteBox (row : any, value : boolean){
+      let children = row.children;
+      children.forEach((ch : any) => {
+        ch.delete = value;
+      });
+
+      if (children.length == 0) {
+        const s_route_id = row.s_route_id;
+
+        const tableData = this.tableData.filter(p=>p.route_id == s_route_id)
+        tableData[0].delete = value;
+      }
   }
 
   private handleCreateRole() {
@@ -224,6 +292,8 @@ export default class extends Vue {
     this.checkStrictly = true
     this.role = cloneDeep(scope.row)
     const { data } = await getRolePermission(this.role.role_id)
+
+    this.tableData = data;
   }
 
   private handleDelete(scope: any) {
@@ -246,12 +316,13 @@ export default class extends Vue {
 
   private async confirmRole() {
     const isEdit = this.dialogType === 'edit'
-
+    this.role.routes = this.tableData;
     if (isEdit) {
       await updateRole(this.role.role_id, { role: this.role })
       for (let index = 0; index < this.rolesList.length; index++) {
         if (this.rolesList[index].role_id === this.role.role_id) {
           this.rolesList.splice(index, 1, Object.assign({}, this.role))
+          this.tableData = [];
           break
         }
       }
@@ -259,6 +330,7 @@ export default class extends Vue {
       const { data } = await createRole({ role: this.role })
       this.role.role_id = data.role_id
       this.rolesList.push(this.role)
+      this.tableData = [];
     }
 
     const { role_keterangan, role_id, role_nama } = this.role
