@@ -145,7 +145,6 @@
 
 <script lang="ts">
 /* eslint-disable */ 
-import path from 'path'
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
 import { RouteConfig } from 'vue-router'
@@ -198,7 +197,6 @@ const defaultRole: IRole = {
 })
 export default class extends Vue {
   private role = Object.assign({}, defaultRole)
-  private serviceRoutes: RouteConfig[] = []
   private rolesList: IRole[] = []
   private dialogVisible = false
   private dialogType = 'new'

@@ -4,12 +4,6 @@ import VueRouter, { RouteConfig } from 'vue-router'
 /* Layout */
 import Layout from '@/layout/index.vue'
 
-/* Router modules */
-// import componentsRouter from './modules/components'
-// import chartsRouter from './modules/charts'
-import tableRouter from './modules/table'
-// import nestedRouter from './modules/nested'
-
 Vue.use(VueRouter)
 
 /*
@@ -99,9 +93,8 @@ export const asyncRoutes: RouteConfig[] = [
   {
     path: '/permission',
     component: Layout,
-    redirect: '/permission/directive',
     meta: {
-      title: 'permission',
+      title: 'Permission',
       icon: 'lock',
       alwaysShow: true // will always show the root menu
     },
@@ -111,7 +104,7 @@ export const asyncRoutes: RouteConfig[] = [
         component: () => import(/* webpackChunkName: "permission-page" */ '@/views/permission/page.vue'),
         name: 'PagePermission',
         meta: {
-          title: 'pagePermission'
+          title: 'Page Permission'
         }
       },
       {
@@ -119,12 +112,30 @@ export const asyncRoutes: RouteConfig[] = [
         component: () => import(/* webpackChunkName: "permission-role" */ '@/views/permission/role.vue'),
         name: 'RolePermission',
         meta: {
-          title: 'rolePermission'
+          title: 'Role Permission'
         }
       }
     ]
   },
-  tableRouter,
+  {
+    path: '/master',
+    component: Layout,
+    meta: {
+      title: 'Master',
+      icon: 'component',
+      alwaysShow: true // will always show the root menu
+    },
+    children: [
+      {
+        path: 'user',
+        component: () => import(/* webpackChunkName: "permission-page" */ '@/views/master/user.vue'),
+        name: 'User',
+        meta: {
+          title: 'User'
+        }
+      }
+    ]
+  },
   {
     path: '/error',
     component: Layout,
@@ -166,21 +177,6 @@ export const asyncRoutes: RouteConfig[] = [
         meta: {
           title: 'errorLog',
           icon: 'bug'
-        }
-      }
-    ]
-  },
-  {
-    path: '/i18n',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import(/* webpackChunkName: "i18n-demo" */ '@/views/i18n-demo/index.vue'),
-        name: 'I18n',
-        meta: {
-          title: 'i18n',
-          icon: 'international'
         }
       }
     ]
