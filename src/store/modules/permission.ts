@@ -3,15 +3,27 @@ import { RouteConfig } from 'vue-router'
 import { asyncRoutes, constantRoutes } from '@/router'
 import store from '@/store'
 
-const hasPermission = (roles: string[], route: RouteConfig) => {
-  if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.includes(role))
-  } else {
+interface IPermission {
+  sRouteId : number
+  create : string
+  read : string
+  update : string
+  delete : string
+  path : string
+  permission1 : string
+  permission2 : string
+  permission3 : string
+  permission4 : string
+}
+
+const hasPermission = (roles: IPermission[], route: RouteConfig) => {
+  const permit = roles.filter(p => (p.path) === route.path && p.read === 'y')
+  if (permit.length > 0) {
     return true
   }
 }
 
-export const filterAsyncRoutes = (routes: RouteConfig[], roles: string[]) => {
+export const filterAsyncRoutes = (routes: RouteConfig[], roles: IPermission[]) => {
   const res: RouteConfig[] = []
   routes.forEach(route => {
     const r = { ...route }
@@ -42,14 +54,8 @@ class Permission extends VuexModule implements IPermissionState {
   }
 
   @Action
-  public GenerateRoutes(roles: string[]) {
-    let accessedRoutes
-    if (roles.includes('admin')) {
-      accessedRoutes = asyncRoutes
-    } else {
-      accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
-    }
-    this.SET_ROUTES(accessedRoutes)
+  public GenerateRoutes(permission : any[]) {
+    this.SET_ROUTES(filterAsyncRoutes(asyncRoutes, permission))
   }
 }
 

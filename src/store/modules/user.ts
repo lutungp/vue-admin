@@ -1,7 +1,7 @@
 import { VuexModule, Module, Action, Mutation, getModule } from 'vuex-module-decorators'
 import { login, logout, getUserInfo } from '@/api/users'
 import { getToken, setToken, removeToken } from '@/utils/cookies'
-import router, { resetRouter } from '@/router'
+import { resetRouter } from '@/router'
 import { PermissionModule } from './permission'
 import { TagsViewModule } from './tags-view'
 import store from '@/store'
@@ -12,6 +12,7 @@ export interface IUserState {
   avatar: string
   introduction: string
   roles: string[]
+  permission: any[]
   email: string
 }
 
@@ -22,6 +23,7 @@ class User extends VuexModule implements IUserState {
   public avatar = ''
   public introduction = ''
   public roles: string[] = []
+  public permission: any[] = []
   public email = ''
 
   @Mutation
@@ -47,6 +49,11 @@ class User extends VuexModule implements IUserState {
   @Mutation
   private SET_ROLES(roles: string[]) {
     this.roles = roles
+  }
+
+  @Mutation
+  private SET_PERMISSION(permission: any[]) {
+    this.permission = permission
   }
 
   @Mutation
@@ -79,7 +86,7 @@ class User extends VuexModule implements IUserState {
     if (!data) {
       throw Error('Verification failed, please Login again.')
     }
-    const { roles, name, avatar, introduction, email } = data.user
+    const { roles, name, avatar, introduction, email, permission } = data.user
     // roles must be a non-empty array
     if (!roles || roles.length <= 0) {
       throw Error('GetUserInfo: roles must be a non-null array!')
@@ -89,6 +96,7 @@ class User extends VuexModule implements IUserState {
     this.SET_AVATAR(avatar)
     this.SET_INTRODUCTION(introduction)
     this.SET_EMAIL(email)
+    this.SET_PERMISSION(permission)
   }
 
   @Action
@@ -100,11 +108,11 @@ class User extends VuexModule implements IUserState {
     await this.GetUserInfo()
     resetRouter()
     // Generate dynamic accessible routes based on roles
-    PermissionModule.GenerateRoutes(this.roles)
+    PermissionModule.GenerateRoutes(this.permission)
     // Add generated routes
-    router.addRoutes(PermissionModule.dynamicRoutes)
-    // Reset visited views and cached views
-    TagsViewModule.delAllViews()
+    // router.addRoutes(PermissionModule.dynamicRoutes)
+    // // Reset visited views and cached views
+    // TagsViewModule.delAllViews()
   }
 
   @Action

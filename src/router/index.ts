@@ -103,7 +103,6 @@ export const asyncRoutes: RouteConfig[] = [
     meta: {
       title: 'permission',
       icon: 'lock',
-      roles: ['admin', 'editor'], // you can set roles in root nav
       alwaysShow: true // will always show the root menu
     },
     children: [
@@ -112,8 +111,7 @@ export const asyncRoutes: RouteConfig[] = [
         component: () => import(/* webpackChunkName: "permission-page" */ '@/views/permission/page.vue'),
         name: 'PagePermission',
         meta: {
-          title: 'pagePermission',
-          roles: ['admin'] // or you can only set roles in sub nav
+          title: 'pagePermission'
         }
       },
       {
@@ -121,8 +119,7 @@ export const asyncRoutes: RouteConfig[] = [
         component: () => import(/* webpackChunkName: "permission-role" */ '@/views/permission/role.vue'),
         name: 'RolePermission',
         meta: {
-          title: 'rolePermission',
-          roles: ['admin']
+          title: 'rolePermission'
         }
       }
     ]
