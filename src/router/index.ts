@@ -94,7 +94,7 @@ export const asyncRoutes: RouteConfig[] = [
     path: '/permission',
     component: Layout,
     meta: {
-      title: 'Permission',
+      title: 'permission',
       icon: 'lock',
       alwaysShow: true // will always show the root menu
     },
@@ -102,17 +102,17 @@ export const asyncRoutes: RouteConfig[] = [
       {
         path: 'page',
         component: () => import(/* webpackChunkName: "permission-page" */ '@/views/permission/page.vue'),
-        name: 'PagePermission',
+        name: 'pagePermission',
         meta: {
-          title: 'Page Permission'
+          title: 'pagePermission'
         }
       },
       {
         path: 'role',
         component: () => import(/* webpackChunkName: "permission-role" */ '@/views/permission/role.vue'),
-        name: 'RolePermission',
+        name: 'rolePermission',
         meta: {
-          title: 'Role Permission'
+          title: 'rolePermission'
         }
       }
     ]
