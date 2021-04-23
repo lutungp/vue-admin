@@ -20,16 +20,23 @@ export const getUserByName = (username: string) =>
     method: 'get'
   })
 
-export const updateUser = (username: string, data: any) =>
+export const createUser = (data: any) =>
   request({
-    url: `/users/${username}`,
+    url: '/users',
+    method: 'post',
+    data
+  })
+
+export const updateUser = (userid: number, data: any) =>
+  request({
+    url: `/users/${userid}`,
     method: 'put',
     data
   })
 
-export const deleteUser = (username: string) =>
+export const deleteUser = (userid: number) =>
   request({
-    url: `/users/${username}`,
+    url: `/users/${userid}`,
     method: 'delete'
   })
 

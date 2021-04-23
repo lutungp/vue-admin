@@ -34,7 +34,7 @@
       <el-button @click="dialogVisible = false">
         Cancel
       </el-button>
-      <el-button
+      <el-button size="small"
         type="primary"
         @click="handleSubmit"
       >

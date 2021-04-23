@@ -7,7 +7,7 @@
       <el-input v-model.trim="user.email" />
     </el-form-item>
     <el-form-item>
-      <el-button
+      <el-button size="small"
         type="primary"
         @click="submit"
       >
