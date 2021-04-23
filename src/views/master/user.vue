@@ -190,6 +190,12 @@ export default class extends Vue {
 
     private confirmRole() {
       console.log(this.user)
+      const isEdit = this.dialogType === 'edit'
+      if (isEdit) {
+
+      } else {
+
+      }
     }
 
     private selectRole (data: string[]) {
