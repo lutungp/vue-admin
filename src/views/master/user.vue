@@ -75,9 +75,12 @@
               />
             </el-form-item>
             <el-form-item label="Usergroup">
-              <el-select v-model="user.s_role_id" clearable placeholder="Select">
+              <el-select v-model="user.s_role_id"
+                clearable
+                placeholder="Select"
+                @change="selectRole">
                 <el-option
-                  v-for="item in options"
+                  v-for="item in optionRoles"
                   :key="item.role_id"
                   :label="item.role_nama"
                   :value="item.role_id"
@@ -115,6 +118,7 @@
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
 import { getUsers } from '@/api/users'
+import { getRoles } from '@/api/roles'
 
 interface IUser {
   user_id : number
@@ -134,6 +138,11 @@ const defaultUser: IUser = {
   password : ""
 }
 
+interface IRoles {
+  role_id : number
+  role_nama : string
+}
+
 @Component({
   name: 'User'
 })
@@ -142,25 +151,11 @@ export default class extends Vue {
     private dialogType = 'new'
     private dataList: IUser[] = []
     private user = Object.assign({}, defaultUser)
-    private options = [{
-          role_id: 'Option1',
-          role_nama: 'Option1'
-        }, {
-          role_id: 'Option2',
-          role_nama: 'Option2'
-        }, {
-          role_id: 'Option3',
-          role_nama: 'Option3'
-        }, {
-          role_id: 'Option4',
-          role_nama: 'Option4'
-        }, {
-          role_id: 'Option5',
-          role_nama: 'Option5'
-        }];
+    private optionRoles : IRoles[] = [];
 
     created() {
       this.getUsers()
+      this.getRoles()
     }
 
     private async getUsers() {
@@ -168,10 +163,19 @@ export default class extends Vue {
       this.dataList = data.users;
     }
 
+    private async getRoles() {
+      const { data } = await getRoles({ /* Your params here */ })
+      this.optionRoles = data.items
+    }
+
+    private reset(){
+      this.user = Object.assign({}, defaultUser)
+    }
+
     private handleCreate() {
       this.dialogType = 'new'
       this.dialogVisible = true
-      console.log('new')
+      this.reset();
     }
 
     private handleEdit(scope: any){
@@ -181,11 +185,15 @@ export default class extends Vue {
     }
 
     private handleDelete(scope: any){
-      
+
     }
 
     private confirmRole() {
       console.log(this.user)
+    }
+
+    private selectRole (data: string[]) {
+      console.log(data);
     }
 };
 </script>
