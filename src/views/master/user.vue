@@ -72,6 +72,8 @@
           :model="user"
           label-width="100px"
           label-position="left"
+          :rules="rules"
+          ref="submitForm"
         >
           <el-form-item label="Kode">
             <el-input
@@ -79,17 +81,16 @@
               placeholder="Kode User"
             />
           </el-form-item>
-          <el-form-item label="Nama">
+          <el-form-item label="Nama" prop="name" required>
             <el-input
               v-model="user.name"
               placeholder="Nama User"
             />
           </el-form-item>
-          <el-form-item label="Usergroup">
+          <el-form-item label="Usergroup" prop="Usergroup" required>
             <el-select v-model="user.s_role_id"
               clearable
-              placeholder="Select"
-              @change="selectRole">
+              placeholder="Select">
               <el-option
                 v-for="item in optionRoles"
                 :key="item.role_id"
@@ -99,7 +100,7 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Password">
+          <el-form-item label="Password" prop="password" required>
             <el-input
               v-model="user.password"
               type="password"
@@ -135,8 +136,7 @@ interface IUser {
   user_id : number
   user_kode : string
   name : string
-  s_role_id : number
-  role_nama : string
+  s_role_id? : number
   password : string
 }
 
@@ -144,8 +144,6 @@ const defaultUser: IUser = {
   user_id : 0,
   user_kode : "",
   name : "",
-  s_role_id : 0,
-  role_nama : "",
   password : ""
 }
 
@@ -164,6 +162,19 @@ export default class extends Vue {
     private dataList: IUser[] = []
     private user = Object.assign({}, defaultUser)
     private optionRoles : IRoles[] = [];
+    rules = {
+      name : [
+        {required: true, message: 'Nama tidak boleh kosong', trigger: 'blur'},
+        {min: 3, max: 100, message: 'Nama minimal 3 karakter dan maksimal 10 karakter', trigger: 'blur'}
+      ],
+      Usergroup : [
+        {required: true, message: 'Role tidak boleh kosong', trigger: 'blur'}
+      ],
+      password : [
+        {required: true, message: 'Password tidak boleh kosong', trigger: 'blur'},
+        {min: 3, max: 100, message: 'Password minimal 3 karakter', trigger: 'blur'}
+      ],
+    }
 
     created() {
       this.getUsers()
@@ -198,13 +209,39 @@ export default class extends Vue {
     }
 
     private handleDelete(scope: any){
+      const { $index, row } = scope
+      this.$confirm('Confirm to remove the role?', 'Warning', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        type: 'warning'
+      })
+        .then(async() => {
 
+        })
+        .catch(err => { console.error(err) })
+    }
+
+    private validateForm(): boolean{
+      var validform = false
+      let el: any = this.$refs["submitForm"]
+      el.validate((valid: boolean) => {
+         validform = valid
+      })
+
+      return validform
     }
 
     private async confirmUser() {
       const isEdit = this.dialogType === 'edit'
+      if (!this.validateForm()) {
+        return false;
+      }
       if (isEdit) {
-        await updateUser(this.user.user_id, { user: this.user })
+        try {
+          await updateUser(this.user.user_id, { user: this.user })
+        } catch(error) {
+          console.log(error);
+        }
         this.dialogVisible = false
         for (let index = 0; index < this.dataList.length; index++) {
           if (this.dataList[index].user_id === this.user.user_id) {
@@ -213,16 +250,17 @@ export default class extends Vue {
           }
         }
       } else {
-        const { data } = await createUser({ user: this.user })
-        this.dialogVisible = false
-        this.user.user_id = data.role_id
-        this.dataList.push(this.user)
-        this.reset();
-      }
-    }
+        try {
+          const { data } = await createUser({ user: this.user })
 
-    private selectRole (data: string[]) {
-      console.log(data);
+          this.dialogVisible = false
+          this.user.user_id = data.role_id
+          this.dataList.push(this.user)
+          this.reset();
+        } catch (error) {
+          const errmsg = error.response.data.message
+        }
+      }
     }
 };
 </script>
