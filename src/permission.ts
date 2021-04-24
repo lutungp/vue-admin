@@ -5,6 +5,7 @@ import { Message } from 'element-ui'
 import { Route } from 'vue-router'
 import { UserModule } from '@/store/modules/user'
 import { PermissionModule } from '@/store/modules/permission'
+import { SatuanModule } from '@/store/modules/satuan'
 import i18n from '@/lang' // Internationalization
 import settings from './settings'
 
@@ -45,6 +46,7 @@ router.beforeEach(async(to: Route, _: Route, next: any) => {
           router.addRoutes(PermissionModule.dynamicRoutes)
           // Hack: ensure addRoutes is complete
           // Set the replace: true, so the navigation will not leave a history record
+          SatuanModule.GetSatuan()
           next({ ...to, replace: true })
         } catch (err) {
           // Remove token and redirect to login page
