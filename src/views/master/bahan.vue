@@ -14,10 +14,10 @@
         <el-table-column
           align="center"
           label="Kode Bahan"
-          width="300"
+          width="110"
         >
           <template slot-scope="{row}">
-            {{ row.kode_bahan }}
+            {{ row.bahan_kode }}
           </template>
         </el-table-column>
         <el-table-column
@@ -26,6 +26,14 @@
         >
           <template slot-scope="{row}">
             {{ row.bahan_nama }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          align="header-center"
+          label="Satuan"
+        >
+          <template slot-scope="{row}">
+            {{ row.satuan_nama }}
           </template>
         </el-table-column>
         <el-table-column
@@ -113,7 +121,7 @@
           </el-button>
           <el-button
             type="primary"
-            @click="confirmUser"
+            @click="confirmForm"
           >
             {{ $t('permission.confirm') }}
           </el-button>
@@ -126,13 +134,14 @@
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
 import { SatuanModule } from '@/store/modules/satuan'
-import { getSatuan } from '@/api/satuan'
-import { getBahan } from '@/api/bahan'
+import { getBahan, createBahan, deleteBahan, updateBahan } from '@/api/bahan'
 
 interface IBahan {
   bahan_id : number
   bahan_kode : string
   bahan_nama : string
+  m_satuan_id? : number
+  satuan_nama? : string
 }
 
 const defaultBahan: IBahan = {
@@ -149,6 +158,12 @@ interface IErrors {
 interface IErrorsmsg {
   field : string
   message : any
+}
+
+interface ISatuan {
+  satuan_id : number
+  satuan_kode : string
+  satuan_nama : string
 }
 
 @Component({
@@ -194,7 +209,13 @@ export default class extends Vue {
   }
 
   private reset(){
-
+    this.bahan = {
+      bahan_id : 0,
+      bahan_kode : "",
+      bahan_nama : "",
+      m_satuan_id : 0,
+      satuan_nama : ""
+    }
   }
 
   private handleCreate () {
@@ -203,8 +224,58 @@ export default class extends Vue {
     this.reset();
   }
 
-  private async confirmUser(){
+  private async handleEdit(scope: any) {
+    this.dialogType = 'edit'
+    this.dialogVisible = true
+    this.reset();
+    this.bahan = cloneDeep(scope.row)
+  }
 
+  private handleDelete(scope: any) {
+    const { $index, row } = scope
+    this.$confirm('Confirm to remove the role?', 'Warning', {
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
+      type: 'warning'
+    })
+      .then(async() => {
+        await deleteBahan(row.bahan_id)
+        this.dataList.splice($index, 1)
+        this.$message({
+          type: 'success',
+          message: 'Deleted!'
+        })
+      })
+      .catch(err => { console.error(err) })
+  }
+
+  private async confirmForm(){
+    const isEdit = this.dialogType === 'edit'
+    if (isEdit) {
+      await updateBahan(this.bahan.bahan_id, { bahan: this.bahan })
+      for (let index = 0; index < this.dataList.length; index++) {
+        if (this.dataList[index].bahan_id === this.bahan.bahan_id) {
+          this.dataList.splice(index, 1, Object.assign({}, this.bahan))
+          break
+        }
+      }
+    } else {
+      const { data } = await createBahan({ bahan: this.bahan })
+      this.bahan.bahan_id = data.bahan_id
+      this.dataList.push(this.bahan)
+    }
+
+    const { bahan_kode, bahan_nama } = this.bahan
+    this.dialogVisible = false
+    this.$notify({
+      title: 'Success',
+      dangerouslyUseHTMLString: true,
+      message: `
+          <div>Kode Bahan: ${bahan_kode}</div>
+          <div>Nama Bahan: ${bahan_nama}</div>
+        `,
+      type: 'success'
+    })
   }
 
   getErrorForField(field : string, error : IErrors[]) {
@@ -215,8 +286,11 @@ export default class extends Vue {
     }
   }
 
-  selectSatuan(){
-
+  selectSatuan(value : number){
+      var selectSatuan = this.satuan.filter(p=>p.satuan_id==value);
+      if (selectSatuan.length > 0) {
+        this.bahan.satuan_nama = selectSatuan[0].satuan_nama
+      }
   }
 }
 </script>

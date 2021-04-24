@@ -200,7 +200,6 @@ export default class extends Vue {
   private rolesList: IRole[] = []
   private dialogVisible = false
   private dialogType = 'new'
-  private checkStrictly = false
   private tableData: IRoutesData[] = []
 
   created() {
@@ -287,7 +286,6 @@ export default class extends Vue {
   private async handleEdit(scope: any) {
     this.dialogType = 'edit'
     this.dialogVisible = true
-    this.checkStrictly = true
     this.role = cloneDeep(scope.row)
     const { data } = await getRolePermission(this.role.role_id)
 

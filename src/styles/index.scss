@@ -156,8 +156,12 @@ aside {
 }
 
 .bottom-static {
+  z-index: 2;
   position: fixed;
   bottom: 0;
+  width: 100% !important;
+  padding: 0 i !important;
+  margin: 0 !important;
 }
 
 @media screen and (max-width: 500px) {
@@ -171,5 +175,10 @@ aside {
 
   .el-button + .el-button {
     margin-left: 0;
+  }
+
+  .bottom-static {
+    text-align: center;
+    left: 0 !important;
   }
 }

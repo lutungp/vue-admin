@@ -1,17 +1,24 @@
+/* eslint-disable */
 import { VuexModule, Module, Mutation, Action, getModule } from 'vuex-module-decorators'
 import { getSatuan } from '@/api/satuan'
 import store from '@/store'
 
+export interface ISatuan {
+  satuan_id : number
+  satuan_kode : string
+  satuan_nama : string
+}
+
 export interface ISatuanState {
-  satuan : string[]
+  satuan : ISatuan[]
 }
 
 @Module({ dynamic: true, store, name: 'satuan' })
 class Satuan extends VuexModule implements ISatuanState {
-  public satuan: string[] = []
+  public satuan: ISatuan[] = []
 
   @Mutation
-  private SET_SATUAN(satuan: string[]) {
+  private SET_SATUAN(satuan: ISatuan[]) {
     this.satuan = satuan
   }
 
