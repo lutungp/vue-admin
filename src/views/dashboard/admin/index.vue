@@ -5,7 +5,6 @@
 </template>
 
 <script lang="ts">
-import 'echarts/theme/macarons.js' // Theme used in BarChart, LineChart, PieChart and RadarChart
 import { Component, Vue } from 'vue-property-decorator'
 
 @Component({

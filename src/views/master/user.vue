@@ -1,9 +1,3 @@
-<style>
-  .bottom-static {
-    position: fixed;
-    bottom: 0;
-  }
-</style>
 <template>
     <div class="app-container">
       <el-button size="small"
@@ -33,6 +27,14 @@
         >
           <template slot-scope="{row}">
             {{ row.name }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          align="header-center"
+          label="Role"
+        >
+          <template slot-scope="{row}">
+            {{ row.role_nama }}
           </template>
         </el-table-column>
         <el-table-column
@@ -98,7 +100,8 @@
             required>
             <el-select v-model="user.s_role_id"
               clearable
-              placeholder="Select">
+              placeholder="Select"
+              @change="selectRole">
               <el-option
                 v-for="item in optionRoles"
                 :key="item.role_id"
@@ -139,7 +142,7 @@
 </template>
 <script lang="ts">
 /* eslint-disable */
-import { cloneDeep } from 'lodash'
+import { cloneDeep, values } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
 import { getUsers, updateUser, createUser, deleteUser } from '@/api/users'
 import { getRoles } from '@/api/roles'
@@ -149,6 +152,7 @@ interface IUser {
   user_kode : string
   name : string
   s_role_id? : number
+  role_nama? : string
   password : string
 }
 
@@ -217,7 +221,14 @@ export default class extends Vue {
     }
 
     private reset(){
-      this.user = Object.assign({}, defaultUser)
+      this.user = {
+        user_id : 0,
+        user_kode : "",
+        name : "",
+        s_role_id : 0,
+        role_nama : "",
+        password : "",
+      }
     }
 
     private handleCreate() {
@@ -229,6 +240,7 @@ export default class extends Vue {
     private handleEdit(scope: any){
       this.dialogType = 'edit'
       this.dialogVisible = true
+      this.reset();
       this.user = cloneDeep(scope.row)
     }
 
@@ -260,6 +272,22 @@ export default class extends Vue {
       return validform
     }
 
+    successResponse(){
+      const { role_nama, name } = this.user
+      this.dialogVisible = false
+      this.$notify({
+        title: 'Success',
+        dangerouslyUseHTMLString: true,
+        message: `
+            <div>Name: ${name}</div>
+            <div>Role: ${role_nama}</div>
+          `,
+        type: 'success'
+      })
+
+      this.reset()
+    }
+
     private async confirmUser() {
       const isEdit = this.dialogType === 'edit'
       if (!this.validateForm()) {
@@ -268,8 +296,21 @@ export default class extends Vue {
       if (isEdit) {
         try {
           await updateUser(this.user.user_id, { user: this.user })
+          this.successResponse()
         } catch(error) {
-          console.log(error);
+          var errmsg = Object.entries(error.response.data.message);
+          var datamsg : IErrorsmsg[] = []
+          errmsg.forEach(function (params:any[]) {
+            var msg = Object.values(params[1])
+            if (msg.length > 0) {
+                datamsg.push({
+                  field : params[0],
+                  message : msg[0]
+                })
+            }
+          })
+
+          this.errors = datamsg
         }
         this.dialogVisible = false
         for (let index = 0; index < this.dataList.length; index++) {
@@ -285,7 +326,7 @@ export default class extends Vue {
           this.dialogVisible = false
           this.user.user_id = data.user_id
           this.dataList.push(this.user)
-          this.reset();
+          this.successResponse()
         } catch (error) {
           var errmsg = Object.entries(error.response.data.message);
           var datamsg : IErrorsmsg[] = []
@@ -309,6 +350,13 @@ export default class extends Vue {
 
       if (errfield.length > 0) {
         return errfield[0].message
+      }
+    }
+
+    selectRole(value : any){
+      var selectRole = this.optionRoles.filter(p=>p.role_id==value);
+      if (selectRole.length > 0) {
+        this.user.role_nama = selectRole[0].role_nama
       }
     }
 };

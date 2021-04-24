@@ -154,3 +154,22 @@ aside {
 .no-padding {
   padding: 0px !important;
 }
+
+.bottom-static {
+  position: fixed;
+  bottom: 0;
+}
+
+@media screen and (max-width: 500px) {
+  .el-dialog, .el-message-box {
+    width: 96% !important;
+  }
+
+  .el-table--medium th, .el-table--medium td {
+    padding: 0;
+  }
+
+  .el-button + .el-button {
+    margin-left: 0;
+  }
+}

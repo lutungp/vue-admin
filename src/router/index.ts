@@ -135,11 +135,11 @@ export const asyncRoutes: RouteConfig[] = [
         }
       },
       {
-        path: 'barang',
-        component: () => import(/* webpackChunkName: "master-barang" */ '@/views/master/barang.vue'),
-        name: 'Barang',
+        path: 'bahan',
+        component: () => import(/* webpackChunkName: "master-bahan" */ '@/views/master/bahan.vue'),
+        name: 'Bahan',
         meta: {
-          title: 'Barang'
+          title: 'Bahan'
         }
       }
     ]
