@@ -81,13 +81,21 @@
               placeholder="Kode User"
             />
           </el-form-item>
-          <el-form-item label="Nama" prop="name" required>
+          <el-form-item
+            label="Nama"
+            prop="name"
+            :error="getErrorForField('name', errors)"
+            required>
             <el-input
               v-model="user.name"
               placeholder="Nama User"
             />
           </el-form-item>
-          <el-form-item label="Usergroup" prop="Usergroup" required>
+          <el-form-item
+            label="User Role"
+            prop="s_role_id"
+            :error="getErrorForField('s_role_id', errors)"
+            required>
             <el-select v-model="user.s_role_id"
               clearable
               placeholder="Select">
@@ -100,7 +108,11 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Password" prop="password" required>
+          <el-form-item
+            label="Password"
+            prop="password"
+            :error="getErrorForField('password', errors)"
+            required>
             <el-input
               v-model="user.password"
               type="password"
@@ -152,6 +164,16 @@ interface IRoles {
   role_nama : string
 }
 
+interface IErrors {
+  message : string
+  field : string
+}
+
+interface IErrorsmsg {
+  field : string
+  message : any
+}
+
 @Component({
   name: 'User'
 })
@@ -167,7 +189,7 @@ export default class extends Vue {
         {required: true, message: 'Nama tidak boleh kosong', trigger: 'blur'},
         {min: 3, max: 100, message: 'Nama minimal 3 karakter dan maksimal 10 karakter', trigger: 'blur'}
       ],
-      Usergroup : [
+      s_role_id : [
         {required: true, message: 'Role tidak boleh kosong', trigger: 'blur'}
       ],
       password : [
@@ -175,6 +197,8 @@ export default class extends Vue {
         {min: 3, max: 100, message: 'Password minimal 3 karakter', trigger: 'blur'}
       ],
     }
+
+    private errors:IErrors[] = []
 
     created() {
       this.getUsers()
@@ -233,9 +257,9 @@ export default class extends Vue {
 
     private async confirmUser() {
       const isEdit = this.dialogType === 'edit'
-      if (!this.validateForm()) {
-        return false;
-      }
+      // if (!this.validateForm()) {
+      //   return false;
+      // }
       if (isEdit) {
         try {
           await updateUser(this.user.user_id, { user: this.user })
@@ -258,8 +282,28 @@ export default class extends Vue {
           this.dataList.push(this.user)
           this.reset();
         } catch (error) {
-          const errmsg = error.response.data.message
+          var errmsg = Object.entries(error.response.data.message);
+          var datamsg : IErrorsmsg[] = []
+          errmsg.forEach(function (params:any[]) {
+            var msg = Object.values(params[1])
+            if (msg.length > 0) {
+                datamsg.push({
+                  field : params[0],
+                  message : msg[0]
+                })
+            }
+          })
+
+          this.errors = datamsg
         }
+      }
+    }
+
+    getErrorForField(field : string, error : IErrors[]) {
+      var errfield = error.filter(p=>p.field === field)
+
+      if (errfield.length > 0) {
+        return errfield[0].message
       }
     }
 };
