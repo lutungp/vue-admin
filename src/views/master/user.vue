@@ -141,7 +141,7 @@
 /* eslint-disable */
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
-import { getUsers, updateUser, createUser } from '@/api/users'
+import { getUsers, updateUser, createUser, deleteUser } from '@/api/users'
 import { getRoles } from '@/api/roles'
 
 interface IUser {
@@ -240,7 +240,12 @@ export default class extends Vue {
         type: 'warning'
       })
         .then(async() => {
-
+          await deleteUser(row.user_id)
+          this.dataList.splice($index, 1)
+          this.$message({
+            type: 'success',
+            message: 'Deleted!'
+          })
         })
         .catch(err => { console.error(err) })
     }
@@ -257,9 +262,9 @@ export default class extends Vue {
 
     private async confirmUser() {
       const isEdit = this.dialogType === 'edit'
-      // if (!this.validateForm()) {
-      //   return false;
-      // }
+      if (!this.validateForm()) {
+        return false;
+      }
       if (isEdit) {
         try {
           await updateUser(this.user.user_id, { user: this.user })
@@ -278,7 +283,7 @@ export default class extends Vue {
           const { data } = await createUser({ user: this.user })
 
           this.dialogVisible = false
-          this.user.user_id = data.role_id
+          this.user.user_id = data.user_id
           this.dataList.push(this.user)
           this.reset();
         } catch (error) {
