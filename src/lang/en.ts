@@ -8,6 +8,7 @@ export default {
     rolePermission: 'Role Permission',
     Master: 'Master',
     User: 'User',
+    Barang: 'Barang',
     profile: 'Profile'
   },
   navbar: {

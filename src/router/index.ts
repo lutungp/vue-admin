@@ -128,10 +128,18 @@ export const asyncRoutes: RouteConfig[] = [
     children: [
       {
         path: 'user',
-        component: () => import(/* webpackChunkName: "permission-page" */ '@/views/master/user.vue'),
+        component: () => import(/* webpackChunkName: "master-user" */ '@/views/master/user.vue'),
         name: 'User',
         meta: {
           title: 'User'
+        }
+      },
+      {
+        path: 'barang',
+        component: () => import(/* webpackChunkName: "master-barang" */ '@/views/master/barang.vue'),
+        name: 'Barang',
+        meta: {
+          title: 'Barang'
         }
       }
     ]

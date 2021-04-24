@@ -144,7 +144,7 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable */ 
+/* eslint-disable */
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
 import { RouteConfig } from 'vue-router'
