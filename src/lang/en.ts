@@ -9,6 +9,7 @@ export default {
     Master: 'Master',
     User: 'User',
     Bahan: 'Bahan',
+    Satuan: 'Satuan',
     profile: 'Profile'
   },
   navbar: {

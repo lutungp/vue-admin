@@ -4,7 +4,7 @@
         type="primary"
         @click="handleCreate"
       >
-        New Bahan
+        New satuan
       </el-button>
       <el-table
         :data="dataList"
@@ -13,24 +13,16 @@
       >
         <el-table-column
           align="center"
-          label="Kode Bahan"
+          label="Kode satuan"
           width="110"
         >
           <template slot-scope="{row}">
-            {{ row.bahan_kode }}
+            {{ row.satuan_kode }}
           </template>
         </el-table-column>
         <el-table-column
           align="header-center"
-          label="Nama Bahan"
-        >
-          <template slot-scope="{row}">
-            {{ row.bahan_nama }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          align="header-center"
-          label="Satuan"
+          label="Nama satuan"
         >
           <template slot-scope="{row}">
             {{ row.satuan_nama }}
@@ -67,10 +59,10 @@
       <el-dialog
         :visible.sync="dialogVisible"
         width="30%"
-        :title="dialogType==='edit'?'Edit Bahan':'New Bahan'"
+        :title="dialogType==='edit'?'Edit Satuan':'New Satuan'"
       >
         <el-form
-          :model="bahan"
+          :model="satuan"
           label-width="100px"
           label-position="left"
           :rules="rules"
@@ -78,38 +70,24 @@
         >
           <el-form-item
             label="Kode"
-            prop="bahan_kode"
+            prop="satuan_kode"
+            :error="getErrorForField('satuan_kode', errors)"
+            required
             >
             <el-input
-              v-model="bahan.bahan_kode"
-              placeholder="Kode Bahan"
+              v-model="satuan.satuan_kode"
+              placeholder="Kode Satuan"
             />
           </el-form-item>
           <el-form-item
             label="Nama"
-            prop="bahan_nama"
+            prop="satuan_nama"
+            :error="getErrorForField('satuan_nama', errors)"
             required>
             <el-input
-              v-model="bahan.bahan_nama"
-              placeholder="Nama Bahan"
+              v-model="satuan.satuan_nama"
+              placeholder="Nama Satuan"
             />
-          </el-form-item>
-          <el-form-item
-            label="Satuan"
-            prop="m_satuan_id"
-            required>
-            <el-select v-model="bahan.m_satuan_id"
-              clearable
-              placeholder="Select"
-              @change="selectSatuan">
-              <el-option
-                v-for="item in satuan"
-                :key="item.satuan_id"
-                :label="item.satuan_nama"
-                :value="item.satuan_id"
-                width="100%">
-              </el-option>
-            </el-select>
           </el-form-item>
         </el-form>
         <div style="text-align:right;">
@@ -133,21 +111,18 @@
 /* eslint-disable */
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
-import { SatuanModule } from '@/store/modules/satuan'
-import { getBahan, createBahan, deleteBahan, updateBahan } from '@/api/bahan'
+import { getSatuanList, createSatuan, deleteSatuan, updateSatuan } from '@/api/satuan'
 
-interface IBahan {
-  bahan_id : number
-  bahan_kode : string
-  bahan_nama : string
-  m_satuan_id? : number
-  satuan_nama? : string
+interface ISatuan {
+  satuan_id : number
+  satuan_kode : string
+  satuan_nama : string
 }
 
-const defaultBahan: IBahan = {
-  bahan_id : 0,
-  bahan_kode : "",
-  bahan_nama : ""
+const defaultsatuan: ISatuan = {
+  satuan_id : 0,
+  satuan_kode : "",
+  satuan_nama : ""
 }
 
 interface IErrors {
@@ -160,14 +135,8 @@ interface IErrorsmsg {
   message : any
 }
 
-interface ISatuan {
-  satuan_id : number
-  satuan_kode : string
-  satuan_nama : string
-}
-
 @Component({
-  name: 'Bahan'
+  name: 'Satuan'
 })
 
 export default class extends Vue {
@@ -175,46 +144,36 @@ export default class extends Vue {
   private dialogType = 'new'
   private dataListTotal = 0
 
-  private dataList: IBahan[] = []
-  private bahan = Object.assign({}, defaultBahan)
+  private dataList: ISatuan[] = []
+  private satuan = Object.assign({}, defaultsatuan)
 
   rules = {
-    bahan_kode : [
-      {required: true, message: 'Nama Bahan tidak boleh kosong', trigger: 'blur'},
-      {min: 3, max: 25, message: 'Nama minimal 3 karakter dan maksimal 25 karakter', trigger: 'blur'}
+    satuan_kode : [
+      {required: true, message: 'Nama satuan tidak boleh kosong', trigger: 'blur'},
     ],
-    bahan_nama : [
-      {required: true, message: 'Nama Bahan tidak boleh kosong', trigger: 'blur'},
+    satuan_nama : [
+      {required: true, message: 'Nama satuan tidak boleh kosong', trigger: 'blur'},
       {min: 3, max: 25, message: 'Nama minimal 3 karakter dan maksimal 25 karakter', trigger: 'blur'}
-    ],
-    m_satuan_id : [
-      {required: true, message: 'Satuan tidak boleh kosong', trigger: 'blur'}
     ],
   }
 
   private errors:IErrors[] = []
 
   created(){
-    this.getBahan()
+    this.getSatuan()
   }
 
-  get satuan() {
-    return SatuanModule.satuan
-  }
-
-  private async getBahan() {
-    const { data } = await getBahan({ /* Your params here */ })
-    this.dataList = data.bahan;
+  private async getSatuan() {
+    const { data } = await getSatuanList({ /* Your params here */ })
+    this.dataList = data.satuan;
     this.dataListTotal = data.total
   }
 
   private reset(){
-    this.bahan = {
-      bahan_id : 0,
-      bahan_kode : "",
-      bahan_nama : "",
-      m_satuan_id : 0,
-      satuan_nama : ""
+    this.satuan = {
+      satuan_id : 0,
+      satuan_kode : "",
+      satuan_nama : "",
     }
   }
 
@@ -228,7 +187,7 @@ export default class extends Vue {
     this.dialogType = 'edit'
     this.dialogVisible = true
     this.reset();
-    this.bahan = cloneDeep(scope.row)
+    this.satuan = cloneDeep(scope.row)
   }
 
   private handleDelete(scope: any) {
@@ -239,7 +198,7 @@ export default class extends Vue {
       type: 'warning'
     })
       .then(async() => {
-        await deleteBahan(row.bahan_id)
+        await deleteSatuan(row.satuan_id)
         this.dataList.splice($index, 1)
         this.$message({
           type: 'success',
@@ -251,26 +210,41 @@ export default class extends Vue {
 
   private async confirmForm(){
     const isEdit = this.dialogType === 'edit'
-    if (isEdit) {
-      await updateBahan(this.bahan.bahan_id, { bahan: this.bahan })
-      this.getBahan()
-    } else {
-      const { data } = await createBahan({ bahan: this.bahan })
-      this.bahan.bahan_id = data.bahan_id
-      this.getBahan()
-    }
+    try {
+      if (isEdit) {
+        await updateSatuan(this.satuan.satuan_id, { satuan: this.satuan })
+        this.getSatuan()
+      } else {
+        const { data } = await createSatuan({ satuan: this.satuan })
+        this.getSatuan()
+      }
 
-    const { bahan_kode, bahan_nama } = this.bahan
-    this.dialogVisible = false
-    this.$notify({
-      title: 'Success',
-      dangerouslyUseHTMLString: true,
-      message: `
-          <div>Kode Bahan: ${bahan_kode}</div>
-          <div>Nama Bahan: ${bahan_nama}</div>
-        `,
-      type: 'success'
-    })
+      const { satuan_kode, satuan_nama } = this.satuan
+      this.dialogVisible = false
+      this.$notify({
+        title: 'Success',
+        dangerouslyUseHTMLString: true,
+        message: `
+            <div>Kode satuan: ${satuan_kode}</div>
+            <div>Nama satuan: ${satuan_nama}</div>
+          `,
+        type: 'success'
+      })
+    } catch (error) {
+      var errmsg = Object.entries(error.response.data.message);
+      var datamsg : IErrorsmsg[] = []
+      errmsg.forEach(function (params:any[]) {
+        var msg = Object.values(params[1])
+        if (msg.length > 0) {
+            datamsg.push({
+              field : params[0],
+              message : msg[0]
+            })
+        }
+      })
+
+      this.errors = datamsg
+    }
   }
 
   getErrorForField(field : string, error : IErrors[]) {
@@ -281,11 +255,5 @@ export default class extends Vue {
     }
   }
 
-  selectSatuan(value : number){
-      var selectSatuan = this.satuan.filter(p=>p.satuan_id==value);
-      if (selectSatuan.length > 0) {
-        this.bahan.satuan_nama = selectSatuan[0].satuan_nama
-      }
-  }
 }
 </script>

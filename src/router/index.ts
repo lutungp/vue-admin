@@ -141,6 +141,14 @@ export const asyncRoutes: RouteConfig[] = [
         meta: {
           title: 'Bahan'
         }
+      },
+      {
+        path: 'satuan',
+        component: () => import(/* webpackChunkName: "master-satuan" */ '@/views/master/satuan.vue'),
+        name: 'Satuan',
+        meta: {
+          title: 'Satuan'
+        }
       }
     ]
   },
