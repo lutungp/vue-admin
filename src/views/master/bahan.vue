@@ -160,12 +160,6 @@ interface IErrorsmsg {
   message : any
 }
 
-interface ISatuan {
-  satuan_id : number
-  satuan_kode : string
-  satuan_nama : string
-}
-
 @Component({
   name: 'Bahan'
 })

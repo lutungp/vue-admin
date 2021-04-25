@@ -164,6 +164,14 @@ aside {
   margin: 0 !important;
 }
 
+.el-table--medium th, .el-table--medium td {
+  padding: 5px 0;
+}
+
+.el-table--medium td {
+  font-size: 12px;
+}
+
 @media screen and (max-width: 500px) {
   .el-dialog, .el-message-box {
     width: 96% !important;

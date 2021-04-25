@@ -37,6 +37,14 @@
           </template>
         </el-table-column>
         <el-table-column
+          align="header-center"
+          label="Produk Kategori"
+        >
+          <template slot-scope="{row}">
+            {{ row.prodkategori_nama }}
+          </template>
+        </el-table-column>
+        <el-table-column
           align="center"
           label="Operations"
         >
@@ -111,6 +119,23 @@
               </el-option>
             </el-select>
           </el-form-item>
+          <el-form-item
+            label="Kategori"
+            prop="m_kategori_id"
+            required>
+            <el-select v-model="produk.m_kategori_id"
+              clearable
+              placeholder="Select"
+              @change="selectProdKategori">
+              <el-option
+                v-for="item in optionProdKategori"
+                :key="item.prodkategori_id"
+                :label="item.prodkategori_nama"
+                :value="item.prodkategori_id"
+                width="100%">
+              </el-option>
+            </el-select>
+          </el-form-item>
         </el-form>
         <div style="text-align:right;">
           <el-button
@@ -134,20 +159,27 @@
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
 import { SatuanModule } from '@/store/modules/satuan'
-import { getProduk, createProduk, deleteProduk, updateProduk } from '@/api/produk'
+import { getProdKategori } from '@/api/prodkategori'
+import { getProdukList, createProduk, deleteProduk, updateProduk } from '@/api/produk'
 
 interface IProduk {
   produk_id : number
   produk_kode : string
   produk_nama : string
-  m_satuan_id? : number
-  satuan_nama? : string
+  m_satuan_id : number
+  satuan_nama : string
+  m_kategori_id : number
+  prodkategori_nama : string
 }
 
 const defaultProduk: IProduk = {
   produk_id : 0,
   produk_kode : "",
-  produk_nama : ""
+  produk_nama : "",
+  m_satuan_id : 0,
+  satuan_nama : "",
+  m_kategori_id : 0,
+  prodkategori_nama : "",
 }
 
 interface IErrors {
@@ -160,10 +192,10 @@ interface IErrorsmsg {
   message : any
 }
 
-interface ISatuan {
-  satuan_id : number
-  satuan_kode : string
-  satuan_nama : string
+interface IProdKategori {
+  prodkategori_id : number
+  prodkategori_kode : string
+  prodkategori_nama : string
 }
 
 @Component({
@@ -178,6 +210,8 @@ export default class extends Vue {
   private dataList: IProduk[] = []
   private produk = Object.assign({}, defaultProduk)
 
+  private optionProdKategori : IProdKategori[] = []
+
   rules = {
     produk_kode : [
       {required: true, message: 'Kode Produk tidak boleh kosong', trigger: 'blur'},
@@ -190,12 +224,16 @@ export default class extends Vue {
     m_satuan_id : [
       {required: true, message: 'Satuan tidak boleh kosong', trigger: 'blur'}
     ],
+    m_kategori_id : [
+      {required: true, message: 'Kategori tidak boleh kosong', trigger: 'blur'}
+    ],
   }
 
   private errors:IErrors[] = []
 
   created(){
     this.getProduk()
+    this.getProdKategori()
   }
 
   get satuan() {
@@ -203,19 +241,19 @@ export default class extends Vue {
   }
 
   private async getProduk() {
-    const { data } = await getProduk({ /* Your params here */ })
+    const { data } = await getProdukList({ /* Your params here */ })
+    console.log(data.produk)
     this.dataList = data.produk;
     this.dataListTotal = data.total
   }
 
+  private async getProdKategori() {
+    const { data } = await getProdKategori({ /* Your params here */ })
+    this.optionProdKategori = data.items;
+  }
+
   private reset(){
-    this.produk = {
-      produk_id : 0,
-      produk_kode : "",
-      produk_nama : "",
-      m_satuan_id : 0,
-      satuan_nama : ""
-    }
+    this.produk = Object.assign({}, defaultProduk)
   }
 
   private handleCreate () {
@@ -285,6 +323,13 @@ export default class extends Vue {
       var selectSatuan = this.satuan.filter(p=>p.satuan_id==value);
       if (selectSatuan.length > 0) {
         this.produk.satuan_nama = selectSatuan[0].satuan_nama
+      }
+  }
+
+  selectProdKategori(value : number){
+      var selectProdKategori = this.optionProdKategori.filter(p=>p.prodkategori_id==value);
+      if (selectProdKategori.length > 0) {
+        this.produk.prodkategori_nama = selectProdKategori[0].prodkategori_nama
       }
   }
 }

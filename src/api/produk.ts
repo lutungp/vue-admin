@@ -7,6 +7,13 @@ export const getProduk = (params: any) =>
     params
   })
 
+export const getProdukList = (params: any) =>
+  request({
+    url: '/produklist',
+    method: 'get',
+    params
+  })
+
 export const createProduk = (data: any) =>
   request({
     url: '/produk',
