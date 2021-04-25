@@ -135,6 +135,14 @@ export const asyncRoutes: RouteConfig[] = [
         }
       },
       {
+        path: 'satuan',
+        component: () => import(/* webpackChunkName: "master-satuan" */ '@/views/master/satuan.vue'),
+        name: 'Satuan',
+        meta: {
+          title: 'Satuan'
+        }
+      },
+      {
         path: 'bahan',
         component: () => import(/* webpackChunkName: "master-bahan" */ '@/views/master/bahan.vue'),
         name: 'Bahan',
@@ -143,11 +151,11 @@ export const asyncRoutes: RouteConfig[] = [
         }
       },
       {
-        path: 'satuan',
-        component: () => import(/* webpackChunkName: "master-satuan" */ '@/views/master/satuan.vue'),
-        name: 'Satuan',
+        path: 'produk',
+        component: () => import(/* webpackChunkName: "master-produk" */ '@/views/master/produk.vue'),
+        name: 'Produk',
         meta: {
-          title: 'Satuan'
+          title: 'Produk'
         }
       }
     ]

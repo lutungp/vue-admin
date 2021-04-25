@@ -4,7 +4,7 @@
         type="primary"
         @click="handleCreate"
       >
-        New Bahan
+        New Produk
       </el-button>
       <el-table
         :data="dataList"
@@ -13,19 +13,19 @@
       >
         <el-table-column
           align="center"
-          label="Kode Bahan"
+          label="Kode Produk"
           width="110"
         >
           <template slot-scope="{row}">
-            {{ row.bahan_kode }}
+            {{ row.produk_kode }}
           </template>
         </el-table-column>
         <el-table-column
           align="header-center"
-          label="Nama Bahan"
+          label="Nama Produk"
         >
           <template slot-scope="{row}">
-            {{ row.bahan_nama }}
+            {{ row.produk_nama }}
           </template>
         </el-table-column>
         <el-table-column
@@ -67,10 +67,10 @@
       <el-dialog
         :visible.sync="dialogVisible"
         width="30%"
-        :title="dialogType==='edit'?'Edit Bahan':'New Bahan'"
+        :title="dialogType==='edit'?'Edit Produk':'New Produk'"
       >
         <el-form
-          :model="bahan"
+          :model="produk"
           label-width="100px"
           label-position="left"
           :rules="rules"
@@ -78,27 +78,27 @@
         >
           <el-form-item
             label="Kode"
-            prop="bahan_kode"
+            prop="produk_kode"
             >
             <el-input
-              v-model="bahan.bahan_kode"
-              placeholder="Kode Bahan"
+              v-model="produk.produk_kode"
+              placeholder="Kode Produk"
             />
           </el-form-item>
           <el-form-item
             label="Nama"
-            prop="bahan_nama"
+            prop="produk_nama"
             required>
             <el-input
-              v-model="bahan.bahan_nama"
-              placeholder="Nama Bahan"
+              v-model="produk.produk_nama"
+              placeholder="Nama Produk"
             />
           </el-form-item>
           <el-form-item
             label="Satuan"
             prop="m_satuan_id"
             required>
-            <el-select v-model="bahan.m_satuan_id"
+            <el-select v-model="produk.m_satuan_id"
               clearable
               placeholder="Select"
               @change="selectSatuan">
@@ -134,20 +134,20 @@
 import { cloneDeep } from 'lodash'
 import { Component, Vue } from 'vue-property-decorator'
 import { SatuanModule } from '@/store/modules/satuan'
-import { getBahan, createBahan, deleteBahan, updateBahan } from '@/api/bahan'
+import { getProduk, createProduk, deleteProduk, updateProduk } from '@/api/produk'
 
-interface IBahan {
-  bahan_id : number
-  bahan_kode : string
-  bahan_nama : string
+interface IProduk {
+  produk_id : number
+  produk_kode : string
+  produk_nama : string
   m_satuan_id? : number
   satuan_nama? : string
 }
 
-const defaultBahan: IBahan = {
-  bahan_id : 0,
-  bahan_kode : "",
-  bahan_nama : ""
+const defaultProduk: IProduk = {
+  produk_id : 0,
+  produk_kode : "",
+  produk_nama : ""
 }
 
 interface IErrors {
@@ -167,7 +167,7 @@ interface ISatuan {
 }
 
 @Component({
-  name: 'Bahan'
+  name: 'Produk'
 })
 
 export default class extends Vue {
@@ -175,17 +175,17 @@ export default class extends Vue {
   private dialogType = 'new'
   private dataListTotal = 0
 
-  private dataList: IBahan[] = []
-  private bahan = Object.assign({}, defaultBahan)
+  private dataList: IProduk[] = []
+  private produk = Object.assign({}, defaultProduk)
 
   rules = {
-    bahan_kode : [
-      {required: true, message: 'Kode Bahan tidak boleh kosong', trigger: 'blur'},
-      {min: 3, max: 25, message: 'Nama Bahan minimal 3 karakter dan maksimal 25 karakter', trigger: 'blur'}
+    produk_kode : [
+      {required: true, message: 'Kode Produk tidak boleh kosong', trigger: 'blur'},
+      {min: 3, max: 25, message: 'Kode minimal 3 karakter dan maksimal 25 karakter', trigger: 'blur'}
     ],
-    bahan_nama : [
-      {required: true, message: 'Nama Bahan tidak boleh kosong', trigger: 'blur'},
-      {min: 3, max: 25, message: 'Nama Bahan minimal 3 karakter dan maksimal 25 karakter', trigger: 'blur'}
+    produk_nama : [
+      {required: true, message: 'Nama Produk tidak boleh kosong', trigger: 'blur'},
+      {min: 3, max: 25, message: 'Nama Produk minimal 3 karakter dan maksimal 25 karakter', trigger: 'blur'}
     ],
     m_satuan_id : [
       {required: true, message: 'Satuan tidak boleh kosong', trigger: 'blur'}
@@ -195,24 +195,24 @@ export default class extends Vue {
   private errors:IErrors[] = []
 
   created(){
-    this.getBahan()
+    this.getProduk()
   }
 
   get satuan() {
     return SatuanModule.satuan
   }
 
-  private async getBahan() {
-    const { data } = await getBahan({ /* Your params here */ })
-    this.dataList = data.bahan;
+  private async getProduk() {
+    const { data } = await getProduk({ /* Your params here */ })
+    this.dataList = data.produk;
     this.dataListTotal = data.total
   }
 
   private reset(){
-    this.bahan = {
-      bahan_id : 0,
-      bahan_kode : "",
-      bahan_nama : "",
+    this.produk = {
+      produk_id : 0,
+      produk_kode : "",
+      produk_nama : "",
       m_satuan_id : 0,
       satuan_nama : ""
     }
@@ -228,7 +228,7 @@ export default class extends Vue {
     this.dialogType = 'edit'
     this.dialogVisible = true
     this.reset();
-    this.bahan = cloneDeep(scope.row)
+    this.produk = cloneDeep(scope.row)
   }
 
   private handleDelete(scope: any) {
@@ -239,7 +239,7 @@ export default class extends Vue {
       type: 'warning'
     })
       .then(async() => {
-        await deleteBahan(row.bahan_id)
+        await deleteProduk(row.produk_id)
         this.dataList.splice($index, 1)
         this.$message({
           type: 'success',
@@ -252,22 +252,22 @@ export default class extends Vue {
   private async confirmForm(){
     const isEdit = this.dialogType === 'edit'
     if (isEdit) {
-      await updateBahan(this.bahan.bahan_id, { bahan: this.bahan })
-      this.getBahan()
+      await updateProduk(this.produk.produk_id, { produk: this.produk })
+      this.getProduk()
     } else {
-      const { data } = await createBahan({ bahan: this.bahan })
-      this.bahan.bahan_id = data.bahan_id
-      this.getBahan()
+      const { data } = await createProduk({ produk: this.produk })
+      this.produk.produk_id = data.produk_id
+      this.getProduk()
     }
 
-    const { bahan_kode, bahan_nama } = this.bahan
+    const { produk_kode, produk_nama } = this.produk
     this.dialogVisible = false
     this.$notify({
       title: 'Success',
       dangerouslyUseHTMLString: true,
       message: `
-          <div>Kode Bahan: ${bahan_kode}</div>
-          <div>Nama Bahan: ${bahan_nama}</div>
+          <div>Kode Produk: ${produk_kode}</div>
+          <div>Nama Produk: ${produk_nama}</div>
         `,
       type: 'success'
     })
@@ -284,7 +284,7 @@ export default class extends Vue {
   selectSatuan(value : number){
       var selectSatuan = this.satuan.filter(p=>p.satuan_id==value);
       if (selectSatuan.length > 0) {
-        this.bahan.satuan_nama = selectSatuan[0].satuan_nama
+        this.produk.satuan_nama = selectSatuan[0].satuan_nama
       }
   }
 }

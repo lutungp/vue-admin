@@ -10,6 +10,7 @@ export default {
     User: 'User',
     Bahan: 'Bahan',
     Satuan: 'Satuan',
+    Produk: 'Produk',
     profile: 'Profile'
   },
   navbar: {
